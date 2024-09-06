@@ -1,7 +1,7 @@
-IMAGE_NAME=docker.bluerobin.io/deployment-manager:latest
+IMAGE_NAME=${DOCKER_REGISTRY}/blue-deploy:latest
 
 login:
-	docker login docker.bluerobin.io -u ${DOCKER_BLUEROBIN_USERNAME} -p ${DOCKER_BLUEROBIN_PASSWORD}
+	docker login ${DOCKER_REGISTRY} -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
 build:
 	docker build --platform linux/amd64 -t ${IMAGE_NAME} . 
