@@ -10,10 +10,6 @@ jobs:
   Docker:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: src/Infrastructure/DeploymentManager
-
     steps:
       - uses: actions/checkout@v4
 
