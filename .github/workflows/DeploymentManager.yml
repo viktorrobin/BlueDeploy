@@ -3,14 +3,8 @@ name: Deployment Manager
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'src/Infrastructure/DeploymentManager/**'
-      - '.github/workflows/DeploymentManager.yml'
   pull_request:
     branches: [ "main" ]
-    paths:
-      - 'src/Infrastructure/DeploymentManager/**'
-      - '.github/workflows/DeploymentManager.yml'
 
 jobs:
   Docker:
