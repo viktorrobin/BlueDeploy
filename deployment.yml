@@ -1,0 +1,19 @@
+kind: Deployment
+metadata:
+  name: events-manager
+spec:
+  replicas: 3
+container:
+  name: events-manager
+  image: docker.bluerobin.io/deployment-manager:latest
+  binding: 127.0.0.1
+  containerPort: 8492
+  hostPort: 10000
+  envVars:
+    - name: ENV
+      value: dev
+    - name: PORT
+      value: 8492
+  secrets:
+    - secretPath: /Nats
+      secretKey: NATS_URL

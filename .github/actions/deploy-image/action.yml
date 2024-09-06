@@ -1,0 +1,65 @@
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action?platform=mac
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-an-action-in-the-same-repository-as-the-workflow
+
+name: Deploy image
+description: Deploy a new docker image
+
+inputs:
+  image-name:
+    description: 'Name of the docker image to deploy'
+    required: true
+  source:
+    description: 'Path to the workflow file that triggered the deployment'
+    required: true
+  id:
+    description: 'Unique identifier for the deployment'
+    required: true
+  deploymentYamlBase64:
+    description: 'Content of the deployment YAML file'
+    required: true
+  MTLS_CLIENT_CERT:
+    description: 'Client certificate for mutual TLS'
+    required: true
+  MTLS_CLIENT_KEY:
+    description: 'Private key for mutual TLS'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create client certificate and key files
+      shell: bash
+      run: |
+        echo "${{ inputs.MTLS_CLIENT_CERT }}" > client.crt
+        echo "${{ inputs.MTLS_CLIENT_KEY }}" > client.key
+        echo "${{ inputs.deploymentYaml }}" | base64 --decode > deployment_tmp.yml
+
+    - name: Make API call with curl
+      shell: bash
+      run: |
+        HTTP_RESPONSE=$(curl \
+          --cert client.crt \
+          --key client.key \
+          --write-out "%{http_code}" \
+          --silent --output /dev/null \
+          --header "Content-Type: application/json" \
+          --header "Br-Event-Source: $SOURCE" \
+          --header "Br-Event-ID: $ID" \
+          --data "{\"file\": \"$CONTENT_BASE64\"}" \
+          --request POST 'https://deploy.bluerobin.io/v1/deployment/images')
+
+        if [ "$HTTP_RESPONSE" -ne 201 ]; then
+          echo "API call failed with response code $HTTP_RESPONSE"
+          exit 1
+        fi
+
+      env:
+        IMAGE_NAME: ${{ inputs.image-name }}
+        SOURCE: ${{ inputs.source }}
+        ID: ${{ inputs.id }}
+        CONTENT_BASE64: ${{ inputs.deploymentYamlBase64 }}
+        
+    - name: Clean up certificate and key files
+      shell: bash
+      run: |
+        rm client.crt client.key

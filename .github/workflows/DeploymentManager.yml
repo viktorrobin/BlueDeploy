@@ -1,0 +1,35 @@
+name: Deployment Manager
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/Infrastructure/DeploymentManager/**'
+      - '.github/workflows/DeploymentManager.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/Infrastructure/DeploymentManager/**'
+      - '.github/workflows/DeploymentManager.yml'
+
+jobs:
+  Docker:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: src/Infrastructure/DeploymentManager
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the Docker image
+        run: make build
+
+      - name: Push the Docker image
+        env:
+          DOCKER_BLUEROBIN_USERNAME: ${{ secrets.DOCKER_BLUEROBIN_USERNAME }}
+          DOCKER_BLUEROBIN_PASSWORD: ${{ secrets.DOCKER_BLUEROBIN_PASSWORD }}
+        run: |
+          make login
+          make push
