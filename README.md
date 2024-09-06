@@ -1,2 +1,2 @@
 # BlueDeploy
-A naive alternative to deploy new images using NATS events
+A naive alternative to deploy new Docker images using NATS events
